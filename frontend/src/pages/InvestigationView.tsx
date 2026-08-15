@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useInvestigationStore } from '../store/investigationStore'
@@ -8,11 +8,15 @@ import ModuleStatusRail from '../components/ModuleStatusRail'
 import FindingCard from '../components/FindingCard'
 import SkeletonCard from '../components/SkeletonCard'
 import ExportBar from '../components/ExportBar'
+import IdentityProfileView from '../components/IdentityProfileView'
+
+type ViewMode = 'findings' | 'identity'
 
 export default function InvestigationView() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const store = useInvestigationStore()
+  const [viewMode, setViewMode] = useState<ViewMode>('findings')
 
   // Connect WS for live updates (no-ops gracefully if already complete or queue gone)
   useInvestigationWS(id ?? null)
@@ -71,6 +75,31 @@ export default function InvestigationView() {
           )}
         </div>
         <div className="flex-1" />
+        
+        {/* View Mode Toggle */}
+        <div className="flex items-center gap-1 mr-3">
+          <button
+            onClick={() => setViewMode('findings')}
+            className={`px-3 py-1 text-xs font-mono border rounded-sm transition-colors ${
+              viewMode === 'findings'
+                ? 'border-cyan-400 text-cyan-400 bg-cyan-400/10'
+                : 'border-zinc-700 text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Findings
+          </button>
+          <button
+            onClick={() => setViewMode('identity')}
+            className={`px-3 py-1 text-xs font-mono border rounded-sm transition-colors ${
+              viewMode === 'identity'
+                ? 'border-cyan-400 text-cyan-400 bg-cyan-400/10'
+                : 'border-zinc-700 text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            Identity & Profile
+          </button>
+        </div>
+        
         <span className={`text-xs uppercase tracking-widest px-2 py-0.5 border rounded-sm ${statusStyle}`}>
           {store.status}
         </span>
@@ -88,38 +117,44 @@ export default function InvestigationView() {
       {/* Summary bar */}
       <SummaryBar />
 
-      {/* Body: rail + findings */}
+      {/* Body: rail + content */}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <ModuleStatusRail />
 
-        {/* Findings stream */}
-        <main className="flex-1 overflow-y-auto p-5 space-y-3">
-          {isLoading && (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          )}
+        {/* Content area */}
+        <main className="flex-1 overflow-hidden flex flex-col">
+          {viewMode === 'findings' ? (
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              {isLoading && (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              )}
 
-          {!isLoading && allFindings.map((f, i) => (
-            <div key={`${f.module}-${i}`} className="animate-fade-in-up">
-              <FindingCard module={f.module} data={f.data} />
+              {!isLoading && allFindings.map((f, i) => (
+                <div key={`${f.module}-${i}`} className="animate-fade-in-up">
+                  <FindingCard module={f.module} data={f.data} />
+                </div>
+              ))}
+
+              {isLive && !isLoading && pendingModules > 0 && (
+                <>
+                  <SkeletonCard />
+                  {pendingModules > 1 && <SkeletonCard />}
+                </>
+              )}
+
+              {!isLoading && !isLive && allFindings.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-zinc-700">
+                  <span className="text-3xl mb-3">○</span>
+                  <p className="text-sm">No findings collected for this investigation.</p>
+                </div>
+              )}
             </div>
-          ))}
-
-          {isLive && !isLoading && pendingModules > 0 && (
-            <>
-              <SkeletonCard />
-              {pendingModules > 1 && <SkeletonCard />}
-            </>
-          )}
-
-          {!isLoading && !isLive && allFindings.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-zinc-700">
-              <span className="text-3xl mb-3">○</span>
-              <p className="text-sm">No findings collected for this investigation.</p>
-            </div>
+          ) : (
+            <IdentityProfileView />
           )}
         </main>
       </div>

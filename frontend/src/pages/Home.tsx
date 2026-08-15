@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useInvestigationStore } from '../store/investigationStore'
 import type { InvestigationSummary } from '../types'
+import ApiKeyManager from '../components/ApiKeyManager'
 
 function scoreToRiskLabel(score: number | null): { label: string; cls: string } {
   if (score === null) return { label: 'N/A', cls: 'text-zinc-600' }
@@ -27,6 +28,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recent, setRecent] = useState<InvestigationSummary[]>([])
+  const [showKeyManager, setShowKeyManager] = useState(false)
+  const [deepBreach, setDeepBreach] = useState(false)
+  const [customModules, setCustomModules] = useState('')
+  const [timeoutSec, setTimeoutSec] = useState(30)
   const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const store = useInvestigationStore()
@@ -43,7 +48,10 @@ export default function Home() {
     setError(null)
     setLoading(true)
     try {
+      const modules = customModules.trim() ? customModules.split(',').map(s => s.trim()) : undefined
+      const enable_modules = deepBreach ? ['breach_deep'] : []
       const res = await api.investigate(trimmed)
+      // Note: For full module config, extend API call with body
       store.initLive(res.id, trimmed)
       navigate(`/investigation/${res.id}`)
     } catch (err) {
@@ -53,141 +61,198 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col overflow-hidden">
-      {/* Animated grid background */}
-      <div className="absolute inset-0 bg-grid-fade pointer-events-none" />
+    <>
+      <div className="min-h-screen bg-zinc-950 flex flex-col overflow-hidden">
+        {/* Animated grid background */}
+        <div className="absolute inset-0 bg-grid-fade pointer-events-none" />
 
-      {/* Center hero */}
-      <div className="flex-1 flex flex-col items-center justify-center relative z-10 px-4">
-        {/* Logo */}
-        <div className="mb-10 text-center select-none">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <polygon
-                points="14,2 26,8 26,20 14,26 2,20 2,8"
-                stroke="#22d3ee"
-                strokeWidth="1.5"
-                fill="rgba(34,211,238,0.06)"
-              />
-              <polygon
-                points="14,7 21,11 21,17 14,21 7,17 7,11"
-                stroke="#22d3ee"
-                strokeWidth="1"
-                fill="rgba(34,211,238,0.1)"
-              />
-            </svg>
-            <h1 className="text-3xl font-bold tracking-[0.2em] text-zinc-100 uppercase text-glow-cyan">
-              MailAccess
-            </h1>
-          </div>
-          <p className="text-zinc-600 text-xs tracking-[0.15em] uppercase">
-            OSINT Email Intelligence Platform
-          </p>
-        </div>
-
-        {/* Search form */}
-        <form onSubmit={handleSubmit} className="w-full max-w-lg">
-          <div className="flex gap-0">
-            <div className="flex-1 relative">
-              <input
-                ref={inputRef}
-                type="email"
-                placeholder="target@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                disabled={loading}
-                className="
-                  w-full bg-zinc-900 border border-zinc-700 border-r-0
-                  text-zinc-100 placeholder-zinc-700
-                  px-4 py-3 text-sm font-mono
-                  rounded-l-sm
-                  focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20
-                  disabled:opacity-50
-                  transition-colors
-                "
-              />
-              {loading && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs animate-pulse">
-                  ●
-                </span>
-              )}
+        {/* Center hero */}
+        <div className="flex-1 flex flex-col items-center justify-center relative z-10 px-4">
+          {/* Logo */}
+          <div className="mb-10 text-center select-none">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <polygon
+                  points="14,2 26,8 26,20 14,26 2,20 2,8"
+                  stroke="#22d3ee"
+                  strokeWidth="1.5"
+                  fill="rgba(34,211,238,0.06)"
+                />
+                <polygon
+                  points="14,7 21,11 21,17 14,21 7,17 7,11"
+                  stroke="#22d3ee"
+                  strokeWidth="1"
+                  fill="rgba(34,211,238,0.1)"
+                />
+              </svg>
+              <h1 className="text-3xl font-bold tracking-[0.2em] text-zinc-100 uppercase text-glow-cyan">
+                MailAccess
+              </h1>
             </div>
-            <button
-              type="submit"
-              disabled={loading || !email.trim()}
-              className="
-                px-6 py-3 bg-cyan-400 text-zinc-950
-                text-xs font-bold uppercase tracking-[0.15em]
-                rounded-r-sm
-                hover:bg-cyan-300
-                disabled:opacity-40 disabled:cursor-not-allowed
-                transition-colors whitespace-nowrap
-              "
-            >
-              {loading ? 'Starting…' : 'Investigate'}
-            </button>
+            <p className="text-zinc-600 text-xs tracking-[0.15em] uppercase">
+              OSINT Email Intelligence Platform
+            </p>
           </div>
 
-          {error && (
-            <p className="mt-2 text-red-400 text-xs font-mono pl-1">
-              ✗ {error}
-            </p>
-          )}
-        </form>
+          {/* Search form */}
+          <form onSubmit={handleSubmit} className="w-full max-w-lg">
+            <div className="flex gap-0">
+              <div className="flex-1 relative">
+                <input
+                  ref={inputRef}
+                  type="email"
+                  placeholder="target@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  disabled={loading}
+                  className="
+                    w-full bg-zinc-900 border border-zinc-700 border-r-0
+                    text-zinc-100 placeholder-zinc-700
+                    px-4 py-3 text-sm font-mono
+                    rounded-l-sm
+                    focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20
+                    disabled:opacity-50
+                    transition-colors
+                  "
+                />
+                {loading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-400 text-xs animate-pulse">
+                    ●
+                  </span>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={loading || !email.trim()}
+                className="
+                  px-6 py-3 bg-cyan-400 text-zinc-950
+                  text-xs font-bold uppercase tracking-[0.15em]
+                  rounded-r-sm
+                  hover:bg-cyan-300
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  transition-colors whitespace-nowrap
+                "
+              >
+                {loading ? 'Starting…' : 'Investigate'}
+              </button>
+            </div>
 
-        {/* Tagline stats */}
-        <div className="mt-6 flex gap-6 text-zinc-700 text-xs">
-          <span>9 modules</span>
-          <span className="text-zinc-800">·</span>
-          <span>real-time streaming</span>
-          <span className="text-zinc-800">·</span>
-          <span>6 export formats</span>
+            {error && (
+              <p className="mt-2 text-red-400 text-xs font-mono pl-1">
+                ✗ {error}
+              </p>
+            )}
+
+            {/* Scan Options */}
+            <div className="mt-4 p-3 bg-zinc-900/50 border border-zinc-800 rounded-sm">
+              <div className="flex items-center gap-4 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deepBreach}
+                    onChange={e => setDeepBreach(e.target.checked)}
+                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-cyan-400 focus:ring-cyan-400/20"
+                  />
+                  <span className="text-zinc-400 text-xs">Deep Breach Check</span>
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-zinc-600 text-xs">Timeout:</span>
+                  <input
+                    type="number"
+                    value={timeoutSec}
+                    onChange={e => setTimeoutSec(Number(e.target.value))}
+                    min={10}
+                    max={300}
+                    className="w-16 bg-zinc-800 border border-zinc-700 text-zinc-200 px-2 py-1 text-xs font-mono rounded focus:outline-none focus:border-cyan-400"
+                  />
+                  <span className="text-zinc-600 text-xs">sec</span>
+                </div>
+
+                <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+                  <span className="text-zinc-600 text-xs">Modules:</span>
+                  <input
+                    type="text"
+                    value={customModules}
+                    onChange={e => setCustomModules(e.target.value)}
+                    placeholder="hibp,sherlock..."
+                    className="flex-1 bg-zinc-800 border border-zinc-700 text-zinc-200 px-2 py-1 text-xs font-mono rounded focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+
+          {/* Tagline stats */}
+          <div className="mt-6 flex gap-6 text-zinc-700 text-xs">
+            <span>9 modules</span>
+            <span className="text-zinc-800">·</span>
+            <span>real-time streaming</span>
+            <span className="text-zinc-800">·</span>
+            <span>6 export formats</span>
+          </div>
         </div>
+
+        {/* Recent investigations */}
+        {recent.length > 0 && (
+          <div className="relative z-10 max-w-2xl mx-auto w-full px-4 pb-10">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-zinc-700 text-xs uppercase tracking-widest font-mono">
+                Recent
+              </span>
+              <div className="flex-1 h-px bg-zinc-800" />
+            </div>
+
+            <div className="space-y-px">
+              {recent.map(inv => {
+                const risk = scoreToRiskLabel(inv.exposure_score)
+                return (
+                  <button
+                    key={inv.id}
+                    onClick={() => navigate(`/investigation/${inv.id}`)}
+                    className="
+                      w-full flex items-center gap-4 px-4 py-2.5
+                      bg-zinc-900/40 border border-zinc-800/50
+                      hover:bg-zinc-900 hover:border-zinc-700
+                      transition-colors text-left
+                      group
+                    "
+                  >
+                    <span className="font-mono text-sm text-zinc-400 group-hover:text-zinc-200 flex-1 truncate transition-colors">
+                      {inv.email}
+                    </span>
+                    <span className="text-zinc-700 text-xs font-mono">{timeAgo(inv.created_at)}</span>
+                    {inv.exposure_score !== null && (
+                      <span className="text-xs font-mono text-zinc-600">
+                        <span className="text-zinc-500">score </span>
+                        <span className="text-cyan-400">{inv.exposure_score}</span>
+                      </span>
+                    )}
+                    <span className={`text-xs font-mono font-bold ${risk.cls}`}>{risk.label}</span>
+                    <span className="text-zinc-700 group-hover:text-zinc-500 transition-colors text-xs">→</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Footer with API Keys button */}
+        <footer className="relative z-10 border-t border-zinc-800 bg-zinc-900/30 px-5 py-2 flex items-center justify-between">
+          <span className="text-zinc-700 text-xs">v0.12.0</span>
+          <button
+            onClick={() => setShowKeyManager(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono border border-zinc-700 text-zinc-400 rounded-sm hover:border-cyan-400 hover:text-cyan-400 transition-colors"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+            </svg>
+            API Keys
+          </button>
+        </footer>
       </div>
 
-      {/* Recent investigations */}
-      {recent.length > 0 && (
-        <div className="relative z-10 max-w-2xl mx-auto w-full px-4 pb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-zinc-700 text-xs uppercase tracking-widest font-mono">
-              Recent
-            </span>
-            <div className="flex-1 h-px bg-zinc-800" />
-          </div>
-
-          <div className="space-y-px">
-            {recent.map(inv => {
-              const risk = scoreToRiskLabel(inv.exposure_score)
-              return (
-                <button
-                  key={inv.id}
-                  onClick={() => navigate(`/investigation/${inv.id}`)}
-                  className="
-                    w-full flex items-center gap-4 px-4 py-2.5
-                    bg-zinc-900/40 border border-zinc-800/50
-                    hover:bg-zinc-900 hover:border-zinc-700
-                    transition-colors text-left
-                    group
-                  "
-                >
-                  <span className="font-mono text-sm text-zinc-400 group-hover:text-zinc-200 flex-1 truncate transition-colors">
-                    {inv.email}
-                  </span>
-                  <span className="text-zinc-700 text-xs font-mono">{timeAgo(inv.created_at)}</span>
-                  {inv.exposure_score !== null && (
-                    <span className="text-xs font-mono text-zinc-600">
-                      <span className="text-zinc-500">score </span>
-                      <span className="text-cyan-400">{inv.exposure_score}</span>
-                    </span>
-                  )}
-                  <span className={`text-xs font-mono font-bold ${risk.cls}`}>{risk.label}</span>
-                  <span className="text-zinc-700 group-hover:text-zinc-500 transition-colors text-xs">→</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+      <ApiKeyManager isOpen={showKeyManager} onClose={() => setShowKeyManager(false)} />
+    </>
   )
 }
