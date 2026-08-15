@@ -1,145 +1,67 @@
+```
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-*.egg-info/
+
+# Build outputs
 dist/
 build/
-.venv/
-venv/
-.env
+*.min.js
+*.min.css
+coverage/
+htmlcov/
+.coverage
 
-# Node
-node_modules/
-dist/
-.next/
-*.local
-
-# OS
+# System files
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
+# Testing
+*.test.js
+*.spec.js
+.test.tsx
+.spec.tsx
 
-# Runtime data
-*.db
-data/
-!data/
-data/*
-!data/mailaccess-extra-sites.json
-!data/breach_aliases.json
-!data/common_names.json
-!data/disposable_domains.json
-!data/fediverse_instances.json
-!data/harvester_sources.json
-!data/reset_signals.json
-!data/role_prefixes.json
-!data/sherlock_sites.json
-!data/service_categories.yaml
-!data/nexfil_sites.json
-!data/subdomain_wordlist.txt
-!data/wmn_sites.json
-!data/harvest_benchmark_domains.json
-maltego/*.mtz
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Secrets (never commit)
-.env
-.env.local
-.env.*.local
-
-# Test artifacts
-test_*.py
-!tests/test_smtp_verify_default.py
-!tests/test_live_progress.py
-!tests/test_persona_email_pivot.py
-!tests/test_name_consensus.py
-!tests/test_timeline.py
-!tests/test_maigret_platforms.py
-!tests/test_disposable_domains.py
-!tests/test_reset_prober.py
-!tests/test_avatar_hasher.py
-!tests/test_avatar_clusters.py
-!tests/test_identity_graph.py
-!tests/test_bio_similarity.py
-!tests/test_bio_clusters.py
-!tests/test_sherlock_detector.py
-!tests/test_sherlock_platforms.py
-!tests/test_rate_limiter.py
-!tests/test_breach_corpus.py
-!tests/test_breach_deep.py
-!tests/test_proxy.py
-!tests/test_github_domain_commits.py
-!tests/test_harvest_pivot_boundaries.py
-!tests/test_brave_dorker.py
-!tests/test_public_surface_batch.py
-!tests/test_subdomain_surface.py
-!tests/test_historical_diff.py
-!tests/test_wayback_historical_selection.py
-!tests/test_identity_enrichment_batch.py
-!tests/test_shadow_profile_harvest_report.py
-!tests/test_harvest_diff.py
-!tests/test_harvest_history.py
-!tests/test_harvest_runtime_controls.py
-!tests/test_yield_prediction.py
-!tests/test_harvest_telemetry.py
-!tests/test_concurrent_fetch_cache_cancellation.py
-!tests/test_cache_exception_consumption.py
-!tests/test_low_email_validator.py
-!tests/test_aggregator.py
-!tests/test_no_live_network.py
-verify_*.py
-.pytest_cache/
-.pytest-tmp/
-coverage/
-.coverage
-
-# Agents
-.agents/
-.codex/
-
-# Local verification / scratch artifacts
-.tmp/
-live-verification-*/
-inspect_structure.py
-
-# Investigation outputs (never commit personal investigation data)
-results/
-/*.json
-/debug*.json
-/report.*
-/emails.*
-/*.txt
-.last_inv.json
-
-# SQLite databases in root
-/mailaccess*.db
-/data.db
-/test-sqlite.db
-/*.db
-
-# Documentation
-!.env.example
-
-# Subdomain Intelligence source data and regression suite
-!data/subdomain_wordlist.json
-!tests/test_subdomain_intel.py
-!tests/test_harvest_cache.py
-!tests/test_parallel_sources.py
-!tests/test_new_sources.py
-!tests/test_doctor_command.py
-!tests/test_auto_export.py
-!tests/test_live_log.py
-!tests/test_keys_test_command.py
-!tests/test_toolchain_output.py
-!tests/test_budget_regression.py
-!tests/test_cross_domain_filter.py
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
