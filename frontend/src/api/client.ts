@@ -65,4 +65,13 @@ export const api = {
   exportUrl(id: string, format: string): string {
     return `${BASE}/report/${id}/export?format=${format}`
   },
+
+  async health(): Promise<boolean> {
+    try {
+      const res = await fetch('/api/health')
+      return res.ok
+    } catch {
+      return false
+    }
+  }
 }
