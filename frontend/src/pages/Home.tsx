@@ -11,12 +11,13 @@ import {
   Layers,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   History,
   Activity,
-  CheckCircle2,
   Clock,
   Terminal,
-  Server
+  Server,
+  Languages
 } from 'lucide-react'
 import { api } from '../api/client'
 import { useInvestigationStore } from '../store/investigationStore'
@@ -24,13 +25,14 @@ import type { InvestigationSummary } from '../types'
 import ApiKeyManager from '../components/ApiKeyManager'
 import QuickActionsModal from '../components/QuickActionsModal'
 import DomainHarvestModal from '../components/DomainHarvestModal'
+import { useLanguage } from '../context/LanguageContext'
 
-function scoreToRiskLabel(score: number | null): { label: string; cls: string; bg: string } {
-  if (score === null) return { label: 'N/A', cls: 'text-zinc-500', bg: 'bg-zinc-800/40 border-zinc-700/40' }
-  if (score <= 20) return { label: 'LOW RISK', cls: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' }
-  if (score <= 50) return { label: 'MED RISK', cls: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' }
-  if (score <= 80) return { label: 'HIGH RISK', cls: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/30' }
-  return { label: 'CRITICAL', cls: 'text-red-400', bg: 'bg-red-500/10 border-red-500/30' }
+function scoreToRiskLabel(score: number | null, t: any): { label: string; cls: string; bg: string } {
+  if (score === null) return { label: 'N/A', cls: 'text-zinc-400', bg: 'bg-zinc-800/40 border-white/5' }
+  if (score <= 20) return { label: t.lowRisk, cls: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' }
+  if (score <= 50) return { label: t.medRisk, cls: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' }
+  if (score <= 80) return { label: t.highRisk, cls: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/30' }
+  return { label: t.criticalRisk, cls: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/30' }
 }
 
 function timeAgo(iso: string): string {
@@ -44,6 +46,7 @@ function timeAgo(iso: string): string {
 }
 
 export default function Home() {
+  const { t, language, setLanguage, isRtl } = useLanguage()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,98 +85,108 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-zinc-950 flex flex-col relative overflow-hidden font-mono selection:bg-cyan-500/30 text-zinc-100">
-        {/* Modern Cyber Grid Glow Overlay */}
-        <div className="absolute inset-0 bg-grid-fade pointer-events-none opacity-60" />
+      <div className={`min-h-screen bg-[#0d0e12] flex flex-col relative overflow-hidden text-zinc-100 ${
+        isRtl ? 'rtl' : 'ltr'
+      }`}>
+        {/* Subtle Apple Cyber Glow */}
+        <div className="absolute inset-0 bg-grid-apple pointer-events-none opacity-80" />
 
-        {/* Floating Top Quick Control Bar */}
-        <header className="relative z-20 px-6 py-3 border-b border-zinc-800/80 bg-zinc-950/70 backdrop-blur-md flex items-center justify-between">
+        {/* Floating Apple Top Bar */}
+        <header className="relative z-20 px-6 py-3 apple-glass border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.25)]">
-              <Shield className="w-4.5 h-4.5" />
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 p-0.5 shadow-lg shadow-sky-500/20">
+              <div className="w-full h-full bg-zinc-950 rounded-[14px] flex items-center justify-center text-sky-400">
+                <Shield className="w-5 h-5" />
+              </div>
             </div>
             <div>
-              <span className="font-bold tracking-wider text-sm text-zinc-100 block leading-none">
-                MailAccess <span className="text-cyan-400 text-xs font-mono font-normal">Desktop</span>
+              <span className="font-bold tracking-tight text-base text-white block leading-tight">
+                {t.appName} <span className="text-sky-400 text-xs font-medium">v0.14.3 Desktop</span>
               </span>
-              <span className="text-[10px] text-zinc-500 tracking-widest uppercase">
-                OSINT Email Intelligence Engine
+              <span className="text-xs text-zinc-400 font-medium">
+                {t.appSubtitle}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setShowHarvestModal(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-md text-xs text-zinc-300 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors"
+              onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs text-zinc-300 transition-all apple-pill"
             >
-              <Globe className="w-3.5 h-3.5 text-cyan-400" />
-              Harvest Domain
+              <Languages className="w-3.5 h-3.5 text-sky-400" />
+              <span>{t.langName}</span>
+            </button>
+            <button
+              onClick={() => setShowHarvestModal(true)}
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs text-zinc-200 transition-all apple-pill"
+            >
+              <Globe className="w-3.5 h-3.5 text-sky-400" />
+              {t.harvest}
             </button>
             <button
               onClick={() => setShowKeyManager(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-md text-xs text-zinc-300 hover:text-cyan-300 hover:border-cyan-500/40 transition-colors"
+              className="flex items-center gap-2 px-3.5 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs text-zinc-200 transition-all apple-pill"
             >
-              <Key className="w-3.5 h-3.5 text-cyan-400" />
-              API Keys
+              <Key className="w-3.5 h-3.5 text-sky-400" />
+              {t.apiKeys}
             </button>
           </div>
         </header>
 
-        {/* Center Hero Content */}
+        {/* Hero Section */}
         <div className="flex-1 flex flex-col items-center justify-center relative z-10 px-4 py-12 max-w-4xl mx-auto w-full">
-          {/* Logo Badge */}
-          <div className="mb-8 text-center select-none animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 px-3 me-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-4">
-              <Sparkles className="w-3.5 h-3.5" /> Fast • Lightweight • Native Tauri Desktop Engine
+          <div className="mb-8 text-center select-none animate-spring-in">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/20 text-sky-300 text-xs font-medium mb-5 shadow-inner">
+              <Sparkles className="w-3.5 h-3.5 text-sky-400" /> Apple macOS Desktop GUI • Native Tauri Speed
             </div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-zinc-100 uppercase text-glow-cyan mb-2">
-              MailAccess
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white mb-3">
+              {t.appName}
             </h1>
-            <p className="text-zinc-400 text-xs sm:text-sm tracking-widest uppercase max-w-lg mx-auto">
-              Unified OSINT Exposure Scoring & Breach Graph Platform
+            <p className="text-zinc-400 text-sm sm:text-base max-w-xl mx-auto font-normal">
+              {t.appSubtitle}
             </p>
           </div>
 
-          {/* Search Bar Container */}
+          {/* Search Box */}
           <div className="w-full max-w-xl mx-auto space-y-3">
             <form onSubmit={handleSubmit} className="relative shadow-2xl">
-              <div className="relative flex items-center bg-zinc-900 border border-zinc-700/90 rounded-xl overflow-hidden focus-within:border-cyan-400 focus-within:ring-2 focus-within:ring-cyan-500/20 transition-all">
-                <div className="pl-4 pr-2 text-zinc-500">
-                  <Search className="w-5 h-5 text-cyan-400" />
+              <div className="relative flex items-center bg-zinc-900/80 apple-glass border border-white/10 rounded-2xl overflow-hidden focus-within:border-sky-400/50 focus-within:ring-4 focus-within:ring-sky-500/10 transition-all">
+                <div className="px-4 text-zinc-400">
+                  <Search className="w-5 h-5 text-sky-400" />
                 </div>
                 <input
                   ref={inputRef}
                   type="email"
-                  placeholder="Enter target email (e.g. target@org.com)..."
+                  placeholder={t.targetEmailPlaceholder}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   disabled={loading}
-                  className="w-full bg-transparent text-zinc-100 placeholder-zinc-600 px-2 py-4 text-sm font-mono focus:outline-none disabled:opacity-50"
+                  className="w-full bg-transparent text-white placeholder-zinc-500 px-2 py-4 text-sm font-sans focus:outline-none disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowOptions(!showOptions)}
-                  className={`px-3 py-2 text-xs font-mono border-l border-zinc-800 flex items-center gap-1.5 transition-colors ${
-                    showOptions ? 'text-cyan-400 bg-zinc-800' : 'text-zinc-400 hover:text-zinc-200'
+                  className={`px-3.5 py-2 text-xs border-l border-white/10 flex items-center gap-1.5 transition-colors ${
+                    showOptions ? 'text-sky-400 bg-white/10' : 'text-zinc-400 hover:text-white'
                   }`}
-                  title="Scan Options"
+                  title="Scan Controls"
                 >
                   <SlidersHorizontal className="w-4 h-4" />
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !email.trim()}
-                  className="px-6 py-4 bg-cyan-500 hover:bg-cyan-400 text-zinc-950 text-xs font-bold uppercase tracking-wider rounded-r-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 whitespace-nowrap"
+                  className="px-6 py-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-semibold tracking-wide rounded-r-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-sky-500/25"
                 >
                   {loading ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
-                      Scanning...
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {t.scanning}
                     </>
                   ) : (
                     <>
-                      Investigate <ArrowRight className="w-4 h-4" />
+                      {t.investigate} {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                     </>
                   )}
                 </button>
@@ -181,33 +194,33 @@ export default function Home() {
             </form>
 
             {error && (
-              <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-lg text-red-300 text-xs font-mono flex items-center gap-2">
-                <span className="text-red-400">✗</span> {error}
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center gap-2 animate-spring-in">
+                <span className="text-rose-400 font-bold">✕</span> {error}
               </div>
             )}
 
-            {/* Configurable Scan Options Drawer */}
+            {/* Options Drawer */}
             {showOptions && (
-              <div className="p-4 bg-zinc-900/90 border border-zinc-800 rounded-xl space-y-3 animate-fade-in-up shadow-xl backdrop-blur-md">
-                <div className="text-xs font-semibold text-zinc-300 flex items-center gap-2 font-mono">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" /> Advanced Investigation Controls
+              <div className="p-4 bg-zinc-900/95 apple-glass border border-white/10 rounded-2xl space-y-3 animate-spring-in shadow-2xl">
+                <div className="text-xs font-semibold text-zinc-200 flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-sky-400" /> Advanced Options
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <label className="flex items-center gap-2.5 cursor-pointer bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 hover:border-zinc-700">
+                  <label className="flex items-center gap-3 cursor-pointer bg-white/5 p-3 rounded-xl border border-white/5 hover:border-white/10 transition-all">
                     <input
                       type="checkbox"
                       checked={deepBreach}
                       onChange={e => setDeepBreach(e.target.checked)}
-                      className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-cyan-400 focus:ring-cyan-400/20"
+                      className="w-4 h-4 rounded border-white/20 bg-zinc-800 text-sky-400 focus:ring-sky-400/20"
                     />
                     <div>
-                      <span className="text-zinc-200 font-medium block">Deep Breach Mode</span>
-                      <span className="text-[10px] text-zinc-500 block">Probe high-risk leak corpora</span>
+                      <span className="text-zinc-200 font-medium block">{t.deepBreachMode}</span>
+                      <span className="text-[11px] text-zinc-400 block">{t.deepBreachDesc}</span>
                     </div>
                   </label>
 
-                  <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 flex items-center justify-between gap-2">
-                    <span className="text-zinc-400">Timeout per module:</span>
+                  <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center justify-between gap-2">
+                    <span className="text-zinc-300">{t.timeoutPerModule}</span>
                     <div className="flex items-center gap-1">
                       <input
                         type="number"
@@ -215,81 +228,81 @@ export default function Home() {
                         onChange={e => setTimeoutSec(Number(e.target.value))}
                         min={10}
                         max={300}
-                        className="w-14 bg-zinc-900 border border-zinc-700 text-zinc-200 px-2 py-1 text-xs font-mono rounded text-center"
+                        className="w-14 bg-zinc-800 border border-white/10 text-white px-2 py-1 text-xs font-mono rounded-lg text-center"
                       />
-                      <span className="text-zinc-600">sec</span>
+                      <span className="text-zinc-400">{t.sec}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-zinc-950 p-2.5 rounded-lg border border-zinc-800 flex items-center gap-2">
-                  <span className="text-zinc-400 text-xs whitespace-nowrap">Specific Modules:</span>
+                <div className="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center gap-2">
+                  <span className="text-zinc-300 text-xs whitespace-nowrap">{t.specificModules}</span>
                   <input
                     type="text"
                     value={customModules}
                     onChange={e => setCustomModules(e.target.value)}
-                    placeholder="hibp, sherlock, holehe, maigret (optional)..."
-                    className="flex-1 bg-zinc-900 border border-zinc-700 text-zinc-200 px-2.5 py-1 text-xs font-mono rounded focus:outline-none focus:border-cyan-400"
+                    placeholder="hibp, sherlock, holehe..."
+                    className="flex-1 bg-zinc-800 border border-white/10 text-white px-3 py-1.5 text-xs font-mono rounded-lg focus:outline-none focus:border-sky-400"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Feature Highlights Rail */}
-          <div className="mt-8 flex items-center justify-center gap-6 text-zinc-500 text-xs font-mono flex-wrap">
+          {/* Features highlight */}
+          <div className="mt-8 flex items-center justify-center gap-6 text-zinc-400 text-xs font-medium flex-wrap">
             <span className="flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-cyan-400" /> 2500+ Platforms
+              <Cpu className="w-4 h-4 text-sky-400" /> {t.platformsCount}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-cyan-400" /> Real-time Streaming
+              <Zap className="w-4 h-4 text-sky-400" /> {t.realtimeStreaming}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-cyan-400" /> 6 Export Formats
+              <Layers className="w-4 h-4 text-sky-400" /> {t.exportFormats}
             </span>
           </div>
         </div>
 
-        {/* Recent Investigations History Bar */}
+        {/* Recent Investigations */}
         {recent.length > 0 && (
           <div className="relative z-10 max-w-4xl mx-auto w-full px-6 pb-12">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs uppercase tracking-widest font-mono text-zinc-400 flex items-center gap-2">
-                <History className="w-3.5 h-3.5 text-cyan-400" /> Recent Target Profiles
+              <span className="text-xs uppercase tracking-wider font-semibold text-zinc-400 flex items-center gap-2">
+                <History className="w-4 h-4 text-sky-400" /> {t.recentProfiles}
               </span>
               <button
                 onClick={() => navigate('/history')}
-                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1"
+                className="text-xs text-sky-400 hover:text-sky-300 font-medium flex items-center gap-1"
               >
-                View all ({recent.length}) →
+                {t.viewAll} ({recent.length}) →
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {recent.slice(0, 4).map(inv => {
-                const risk = scoreToRiskLabel(inv.exposure_score)
+                const risk = scoreToRiskLabel(inv.exposure_score, t)
                 return (
                   <button
                     key={inv.id}
                     onClick={() => navigate(`/investigation/${inv.id}`)}
-                    className="flex items-center justify-between p-3.5 bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 hover:border-cyan-500/40 rounded-xl transition-all text-left group"
+                    className="flex items-center justify-between p-4 apple-card rounded-2xl transition-all text-left group"
                   >
                     <div className="min-w-0 flex-1 pr-3">
-                      <span className="font-mono text-xs sm:text-sm text-zinc-200 group-hover:text-cyan-300 truncate block font-semibold transition-colors">
+                      <span className="font-mono text-sm text-white group-hover:text-sky-300 truncate block font-semibold transition-colors">
                         {inv.email}
                       </span>
-                      <span className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3" /> {timeAgo(inv.created_at)}
+                      <span className="text-xs text-zinc-400 flex items-center gap-1 mt-1">
+                        <Clock className="w-3.5 h-3.5" /> {timeAgo(inv.created_at)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-mono font-bold px-2 py-1 rounded border ${risk.bg} ${risk.cls}`}>
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${risk.bg} ${risk.cls}`}>
                         {risk.label}
                       </span>
-                      <span className="text-zinc-600 group-hover:text-cyan-400 transition-colors">→</span>
+                      <span className="text-zinc-500 group-hover:text-sky-400 transition-colors">→</span>
                     </div>
                   </button>
                 )
@@ -298,21 +311,19 @@ export default function Home() {
           </div>
         )}
 
-        {/* Desktop Status Bar Footer */}
-        <footer className="relative z-10 border-t border-zinc-800 bg-zinc-950 px-6 py-2.5 flex items-center justify-between text-xs text-zinc-500 font-mono">
+        {/* Footer */}
+        <footer className="relative z-10 border-t border-white/5 apple-glass px-6 py-3 flex items-center justify-between text-xs text-zinc-400">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-zinc-400">
-              <Server className="w-3.5 h-3.5 text-cyan-400" /> Tauri Desktop Core v0.14.3
+            <span className="flex items-center gap-1.5 text-zinc-300">
+              <Server className="w-4 h-4 text-sky-400" /> Tauri Desktop Core v0.14.3
             </span>
-            <span className="hidden sm:inline text-zinc-700">|</span>
-            <span className="hidden sm:inline text-zinc-500">Self-hostable OSINT Suite</span>
           </div>
 
           <button
             onClick={() => setShowQuickActions(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-zinc-300 hover:text-white hover:bg-white/10 transition-colors apple-pill"
           >
-            <Terminal className="w-3.5 h-3.5 text-cyan-400" /> Quick Launcher
+            <Terminal className="w-3.5 h-3.5 text-sky-400" /> {t.quickLauncher}
           </button>
         </footer>
       </div>
