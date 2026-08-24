@@ -2,7 +2,9 @@ name: Build Windows Desktop App Executable (.exe)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
   workflow_dispatch:
 
 jobs:
@@ -31,7 +33,7 @@ jobs:
       - name: Build Tauri Desktop Executable (.exe / .msi)
         run: |
           cd frontend
-          npm run tauri build
+          npx tauri build
 
       - name: Upload Windows Executable Artifact
         uses: actions/upload-artifact@v4
